@@ -2,12 +2,12 @@
 function createParticles() {
     const particlesContainer = document.getElementById('particles');
     
-    // Ajusta o número de partículas baseado no tamanho da tela
+    // Ajusta o número de partículas baseado no tamanho da tela - AUMENTADO
     const getParticleCount = () => {
         const width = window.innerWidth;
-        if (width < 480) return 20;  // Menos partículas em telas pequenas
-        if (width < 768) return 35;
-        return 50;
+        if (width < 480) return 35;  // Aumentado de 20 para 35
+        if (width < 768) return 60;  // Aumentado de 35 para 60
+        return 85;  // Aumentado de 50 para 85
     };
     
     const particleCount = getParticleCount();
@@ -23,16 +23,118 @@ function createParticles() {
         particle.style.left = Math.random() * 100 + '%';
         particle.style.top = Math.random() * 100 + '%';
         
-        // Animação com delays e durações aleatórias
-        particle.style.animationDelay = Math.random() * 6 + 's';
-        particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        // Animação com delays e durações aleatórias - mais variação
+        particle.style.animationDelay = Math.random() * 8 + 's';  // Aumentado de 6 para 8
+        particle.style.animationDuration = (Math.random() * 4 + 2) + 's';  // Mais variação
         
-        // Tamanho variável das partículas
-        const size = Math.random() * 2 + 1;
+        // Tamanho variável das partículas - mais variação
+        const size = Math.random() * 3 + 0.5;  // Tamanhos de 0.5px a 3.5px
         particle.style.width = size + 'px';
         particle.style.height = size + 'px';
         
+        // Adicionar diferentes tipos de animação
+        const animationType = Math.floor(Math.random() * 3);
+        switch(animationType) {
+            case 0:
+                particle.style.animationName = 'float';
+                break;
+            case 1:
+                particle.style.animationName = 'sparkle';
+                break;
+            case 2:
+                particle.style.animationName = 'drift';
+                break;
+        }
+        
+        // Variação na opacidade
+        particle.style.opacity = Math.random() * 0.6 + 0.4;  // Entre 0.4 e 1.0
+        
         particlesContainer.appendChild(particle);
+    }
+}
+
+// Criar partículas especiais adicionais
+function createSpecialParticles() {
+    const particlesContainer = document.getElementById('particles');
+    
+    // Criar algumas partículas maiores e mais brilhantes
+    const specialCount = Math.floor(window.innerWidth < 768 ? 8 : 15);
+    
+    for (let i = 0; i < specialCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle special-particle';
+        
+        // Posicionamento
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        
+        // Propriedades especiais
+        particle.style.animationDelay = Math.random() * 10 + 's';
+        particle.style.animationDuration = (Math.random() * 6 + 4) + 's';
+        
+        // Tamanho maior
+        const size = Math.random() * 2 + 3;  // 3px a 5px
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        // Cor mais intensa
+        particle.style.background = '#ffed4e';
+        particle.style.boxShadow = '0 0 6px #ffd700, 0 0 12px #ffd700';
+        
+        // Animação especial
+        particle.style.animationName = 'twinkle';
+        
+        particlesContainer.appendChild(particle);
+    }
+}
+
+// Criar partículas que seguem o cursor (apenas em desktop)
+function createCursorTrail() {
+    if (window.innerWidth < 768 || isTouchDevice()) return;
+    
+    let mouseX = 0, mouseY = 0;
+    const trailParticles = [];
+    
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        // Criar partícula ocasionalmente
+        if (Math.random() < 0.3) {
+            createTrailParticle(mouseX, mouseY);
+        }
+    });
+    
+    function createTrailParticle(x, y) {
+        const particle = document.createElement('div');
+        particle.className = 'trail-particle';
+        particle.style.position = 'fixed';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.width = '2px';
+        particle.style.height = '2px';
+        particle.style.background = '#ffd700';
+        particle.style.borderRadius = '50%';
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '3';
+        particle.style.opacity = '1';
+        particle.style.transition = 'all 1.5s ease-out';
+        
+        document.body.appendChild(particle);
+        
+        // Animar e remover
+        requestAnimationFrame(() => {
+            particle.style.opacity = '0';
+            particle.style.transform = 'translate(' + 
+                (Math.random() - 0.5) * 100 + 'px, ' + 
+                (Math.random() - 0.5) * 100 + 'px) scale(0)';
+        });
+        
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        }, 1500);
     }
 }
 
@@ -93,6 +195,7 @@ function debounce(func, wait) {
 // Recriar partículas quando a tela é redimensionada
 const handleResize = debounce(() => {
     createParticles();
+    createSpecialParticles();
 }, 250);
 
 // Adicionar efeito de hover nos elementos do contador
@@ -257,8 +360,14 @@ function initializeApp() {
     // Verificar preferências do usuário
     handleReducedMotion();
     
-    // Criar partículas
+    // Criar partículas normais
     createParticles();
+    
+    // Criar partículas especiais
+    createSpecialParticles();
+    
+    // Criar trail do cursor (apenas desktop)
+    createCursorTrail();
     
     // Inicializar contador
     countdownInterval = initCountdown();
